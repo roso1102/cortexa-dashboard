@@ -2,6 +2,10 @@ import { getMemories } from "@/lib/cortexaApi";
 
 export const dynamic = "force-dynamic";
 
+const FILTERED_PAGE_SIZE = 20;
+const UNFILTERED_BATCH_SIZE = 100;
+const MAX_UNFILTERED_ITEMS = 500;
+
 function normalizeRouteId(id: string): string {
   let current = id;
   for (let i = 0; i < 5; i += 1) {
@@ -28,12 +32,44 @@ export default async function MemoriesPage({
   const source_type = typeof sp.source_type === "string" ? sp.source_type : "";
   const tag = typeof sp.tag === "string" ? sp.tag : "";
   const page = typeof sp.page === "string" ? Math.max(parseInt(sp.page, 10) || 1, 1) : 1;
+  const hasFilters = Boolean(q || source_type || tag);
 
   let error: string | null = null;
-  let data = { items: [] as Awaited<ReturnType<typeof getMemories>>["items"], total: 0, page, per_page: 10 };
+  let isTruncated = false;
+  let data = { items: [] as Awaited<ReturnType<typeof getMemories>>["items"], total: 0, page, per_page: FILTERED_PAGE_SIZE };
 
   try {
-    data = await getMemories({ q, source_type, tag, page, per_page: 10 });
+    if (hasFilters) {
+      data = await getMemories({ q, source_type, tag, page, per_page: FILTERED_PAGE_SIZE });
+    } else {
+      const first = await getMemories({ page: 1, per_page: UNFILTERED_BATCH_SIZE });
+      const merged = [...first.items];
+      const maxPages = Math.max(1, Math.ceil(Math.min(first.total, MAX_UNFILTERED_ITEMS) / UNFILTERED_BATCH_SIZE));
+
+      for (let p = 2; p <= maxPages && merged.length < first.total; p += 1) {
+        const nextPage = await getMemories({ page: p, per_page: UNFILTERED_BATCH_SIZE });
+        if (!nextPage.items.length) {
+          break;
+        }
+        merged.push(...nextPage.items);
+      }
+
+      if (merged.length > MAX_UNFILTERED_ITEMS) {
+        merged.length = MAX_UNFILTERED_ITEMS;
+        isTruncated = true;
+      }
+
+      if (first.total > MAX_UNFILTERED_ITEMS) {
+        isTruncated = true;
+      }
+
+      data = {
+        items: merged,
+        total: first.total,
+        page: 1,
+        per_page: merged.length || UNFILTERED_BATCH_SIZE,
+      };
+    }
   } catch (e) {
     error = e instanceof Error ? e.message : "Unknown error";
   }
@@ -81,6 +117,11 @@ export default async function MemoriesPage({
         <div className="border-b border-zinc-200 p-4 text-sm text-zinc-600">
           Showing {data.items.length} of {data.total} (page {data.page})
         </div>
+        {isTruncated ? (
+          <div className="border-b border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Loaded the first {MAX_UNFILTERED_ITEMS} memories. Use search or filters to narrow down older items.
+          </div>
+        ) : null}
         <div className="divide-y divide-zinc-100">
           {data.items.map((m, idx) => {
             const raw = (m.raw_content as string) || "";
@@ -94,7 +135,7 @@ export default async function MemoriesPage({
             const memoryId = typeof m.id === "string" ? normalizeRouteId(m.id) : "";
             const tagsArr = Array.isArray(m.tags) ? (m.tags as string[]) : [];
             return (
-              <div key={(m.id as string) || `${idx}`} className="p-4">
+              <div key={`${(m.id as string) || "memory"}-${idx}`} className="p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
                   {memoryId ? (
@@ -131,7 +172,9 @@ export default async function MemoriesPage({
         </div>
       </section>
 
-      <Pager page={data.page} total={data.total} perPage={data.per_page} q={q} source_type={source_type} tag={tag} />
+      {hasFilters ? (
+        <Pager page={data.page} total={data.total} perPage={data.per_page} q={q} source_type={source_type} tag={tag} />
+      ) : null}
     </div>
   );
 }
