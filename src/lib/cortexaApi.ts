@@ -26,6 +26,32 @@ function baseUrl(): string {
   return raw.replace(/\/+$/, "");
 }
 
+function decodeURIComponentSafe(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function fullyDecodeURIComponent(value: string, maxRounds = 5): string {
+  let current = value;
+  for (let i = 0; i < maxRounds; i += 1) {
+    const decoded = decodeURIComponentSafe(current);
+    if (decoded === current) {
+      break;
+    }
+    current = decoded;
+  }
+  return current;
+}
+
+function encodeMemoryIdOnce(id: string): string {
+  // Some backends return ids that are already URL-encoded one or more times.
+  // Canonicalize by fully decoding then encoding exactly once.
+  return encodeURIComponent(fullyDecodeURIComponent(id));
+}
+
 async function apiFetch<T>(path: string): Promise<T> {
   const secret = requireEnv("DASHBOARD_SECRET");
   const res = await fetch(`${baseUrl()}${path}`, {
@@ -84,6 +110,6 @@ export async function getMemories(params?: {
 }
 
 export async function getMemoryById(id: string): Promise<{ item: MemoryItem }> {
-  return apiFetch(`/api/memories/${encodeURIComponent(id)}`);
+  return apiFetch(`/api/memories/${encodeMemoryIdOnce(id)}`);
 }
 

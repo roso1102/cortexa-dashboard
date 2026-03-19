@@ -2,6 +2,22 @@ import { getMemories } from "@/lib/cortexaApi";
 
 export const dynamic = "force-dynamic";
 
+function normalizeRouteId(id: string): string {
+  let current = id;
+  for (let i = 0; i < 5; i += 1) {
+    try {
+      const decoded = decodeURIComponent(current);
+      if (decoded === current) {
+        break;
+      }
+      current = decoded;
+    } catch {
+      break;
+    }
+  }
+  return encodeURIComponent(current);
+}
+
 export default async function MemoriesPage({
   searchParams,
 }: {
@@ -75,13 +91,14 @@ export default async function MemoriesPage({
               .find((l) => l.length > 0);
             const title = (m.title as string) || firstLine || (m.file_name as string) || (m.url as string) || "Untitled";
             const st = (m.source_type as string) || "text";
+            const memoryId = typeof m.id === "string" ? normalizeRouteId(m.id) : "";
             const tagsArr = Array.isArray(m.tags) ? (m.tags as string[]) : [];
             return (
               <div key={(m.id as string) || `${idx}`} className="p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
-                  {m.id ? (
-                    <a className="text-sm font-medium text-blue-700 hover:underline" href={`/memories/${m.id as string}`}>
+                  {memoryId ? (
+                    <a className="text-sm font-medium text-blue-700 hover:underline" href={`/memories/${memoryId}`}>
                       {title}
                     </a>
                   ) : (
