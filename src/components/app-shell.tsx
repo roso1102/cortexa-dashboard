@@ -1,4 +1,7 @@
+"use client";
+
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { FadeIn } from "@/components/ui/motion";
 
@@ -7,6 +10,19 @@ type AppShellProps = {
 };
 
 export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const isAuthRoute = pathname === "/login";
+
+  if (isAuthRoute) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white via-white to-zinc-50 px-4 py-8">
+        <div className="mx-auto w-full max-w-md">
+          <FadeIn>{children}</FadeIn>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-white to-zinc-50">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:gap-6 md:py-8">

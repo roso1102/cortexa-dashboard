@@ -85,7 +85,7 @@ async function Dashboard() {
                 {error}
               </div>
               <p className="mt-2 text-xs text-zinc-600">
-                Check your <code>NEXT_PUBLIC_API_URL</code> and <code>DASHBOARD_SECRET</code> environment variables.
+                Check your <code>NEXT_PUBLIC_API_URL</code> and make sure you are logged in with a valid dashboard token.
               </p>
             </div>
           ) : (

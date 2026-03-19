@@ -1,3 +1,5 @@
+import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
+
 export type MemoryItem = Record<string, unknown> & {
   id?: string;
   source_type?: string;
@@ -53,11 +55,12 @@ function encodeMemoryIdOnce(id: string): string {
 }
 
 async function apiFetch<T>(path: string): Promise<T> {
-  const secret = requireEnv("DASHBOARD_SECRET");
+  const token = await resolveDashboardToken();
+
   const res = await fetch(`${baseUrl()}${path}`, {
     method: "GET",
     headers: {
-      "X-Dashboard-Token": secret,
+      ...(token ? { "X-Dashboard-Token": token } : {}),
     },
     cache: "no-store",
   });
@@ -78,6 +81,16 @@ async function apiFetch<T>(path: string): Promise<T> {
   }
 
   return (await res.json()) as T;
+}
+
+async function resolveDashboardToken(): Promise<string | null> {
+  if (typeof window !== "undefined") {
+    return window.localStorage.getItem(DASHBOARD_TOKEN_KEY);
+  }
+
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  return cookieStore.get(DASHBOARD_TOKEN_KEY)?.value ?? null;
 }
 
 export async function getTodaySummary(): Promise<{ text: string; generated_at: string }> {

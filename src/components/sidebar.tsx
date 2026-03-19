@@ -1,11 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    window.localStorage.removeItem(DASHBOARD_TOKEN_KEY);
+    document.cookie = `${DASHBOARD_TOKEN_KEY}=; path=/; max-age=0; samesite=lax`;
+    router.replace("/login");
+  };
 
   const links = [
     { href: "/", label: "Dashboard", icon: "📊" },
@@ -38,6 +46,13 @@ export function Sidebar() {
               );
             })}
           </nav>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
@@ -65,6 +80,13 @@ export function Sidebar() {
           </nav>
           <div className="mt-6 border-t border-zinc-200 pt-4">
             <Badge className="text-xs">v0.1.0</Badge>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-3 w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </aside>
