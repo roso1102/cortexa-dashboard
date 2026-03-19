@@ -9,9 +9,9 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-white to-zinc-50">
-      <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 py-6 md:py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:gap-6 md:py-8">
         <Sidebar />
-        <main className="flex-1">
+        <main className="min-w-0 flex-1">
           <div className="space-y-6">
             <FadeIn>{children}</FadeIn>
           </div>

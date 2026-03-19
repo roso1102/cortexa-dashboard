@@ -6,7 +6,15 @@ import { ScaleIn } from "@/components/ui/motion";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const { snapshot } = await getProfile();
+  let snapshot = "";
+  let error: string | null = null;
+
+  try {
+    const res = await getProfile();
+    snapshot = res.snapshot;
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
 
   return (
     <>
@@ -18,7 +26,11 @@ export default async function ProfilePage() {
 
       <ScaleIn delay={0.1}>
         <Card>
-          {snapshot ? (
+          {error ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              Unable to load profile snapshot: {error}
+            </div>
+          ) : snapshot ? (
             <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
               <pre className="overflow-auto font-mono text-sm leading-6 text-zinc-800">
                 {snapshot}

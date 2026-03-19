@@ -1,75 +1,76 @@
 import { getMemoryById } from "@/lib/cortexaApi";
-import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScaleIn } from "@/components/ui/motion";
 
 export const dynamic = "force-dynamic";
 
 export default async function MemoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const data = await getMemoryById(id);
-  const m = data.item;
+  let m: Awaited<ReturnType<typeof getMemoryById>>["item"] | null = null;
+  let error: string | null = null;
 
-  const title = (m.title as string) || (m.file_name as string) || (m.url as string) || "Memory";
-  const st = (m.source_type as string) || "text";
+  try {
+    const data = await getMemoryById(id);
+    m = data.item;
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
+
+  if (!m) {
+    return (
+      <div className="space-y-6">
+        <header className="rounded-2xl border border-zinc-200 bg-white p-6">
+          <div className="text-sm text-zinc-500">Memory</div>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Memory detail</h1>
+        </header>
+        <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+          Unable to load memory: {error || "Not found"}
+        </section>
+      </div>
+    );
+  }
+
   const raw = (m.raw_content as string) || "";
+  const firstLine = raw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .find((l) => l.length > 0);
+  const title = (m.title as string) || firstLine || (m.file_name as string) || (m.url as string) || "Memory";
+  const st = (m.source_type as string) || "text";
   const tagsArr = Array.isArray(m.tags) ? (m.tags as string[]) : [];
 
   return (
-    <>
-      <PageHeader
-        label="Memory"
-        title={title}
-      />
+    <div className="space-y-6">
+      <header className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="text-sm text-zinc-500">Memory</div>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h1>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
+          {m.id ? <span className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">id: {m.id as string}</span> : null}
+        </div>
+        {m.url ? (
+          <a className="mt-3 block break-all text-sm text-blue-700 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+            {m.url as string}
+          </a>
+        ) : null}
+      </header>
 
-      <ScaleIn delay={0.1}>
-        <Card>
-          <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-zinc-200 pb-4">
-            <Badge>{st}</Badge>
-            {m.id && (
-              <Badge className="flex-shrink-0 text-xs">
-                id: {(m.id as string).slice(0, 12)}…
-              </Badge>
-            )}
+      {tagsArr.length ? (
+        <section className="rounded-2xl border border-zinc-200 bg-white p-6">
+          <div className="text-sm font-medium">Tags</div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {tagsArr.map((t) => (
+              <span key={t} className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">
+                {t}
+              </span>
+            ))}
           </div>
-          {m.url && (
-            <a
-              className="block break-all text-sm text-blue-600 hover:underline"
-              href={m.url as string}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {m.url as string}
-            </a>
-          )}
-        </Card>
-      </ScaleIn>
+        </section>
+      ) : null}
 
-      {tagsArr.length > 0 && (
-        <ScaleIn delay={0.2}>
-          <Card>
-            <div className="mb-4 text-sm font-semibold text-zinc-900">Tags</div>
-            <div className="flex flex-wrap gap-2">
-              {tagsArr.map((t) => (
-                <Badge key={t}>{t}</Badge>
-              ))}
-            </div>
-          </Card>
-        </ScaleIn>
-      )}
-
-      <ScaleIn delay={0.3}>
-        <Card>
-          <div className="mb-4 text-sm font-semibold text-zinc-900">Full text</div>
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <pre className="overflow-auto whitespace-pre-wrap font-mono text-sm leading-6 text-zinc-800">
-              {raw}
-            </pre>
-          </div>
-        </Card>
-      </ScaleIn>
-    </>
+      <section className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="text-sm font-medium">Full text</div>
+        <pre className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-800">{raw}</pre>
+      </section>
+    </div>
   );
 }
 

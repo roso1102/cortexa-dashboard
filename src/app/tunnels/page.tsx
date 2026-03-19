@@ -7,7 +7,15 @@ import { ScaleIn } from "@/components/ui/motion";
 export const dynamic = "force-dynamic";
 
 export default async function TunnelsPage() {
-  const { tunnels } = await getTunnels();
+  let tunnels: Awaited<ReturnType<typeof getTunnels>>["tunnels"] = [];
+  let error: string | null = null;
+
+  try {
+    const res = await getTunnels();
+    tunnels = res.tunnels;
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
 
   // Deduplicate by id if present
   const seen = new Set<string>();
@@ -26,6 +34,16 @@ export default async function TunnelsPage() {
         title="Your semantic tunnels"
         description="Weekly theme clusters automatically named by the LLM. Explore how memories group together."
       />
+
+      {error ? (
+        <ScaleIn delay={0.1}>
+          <Card>
+            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              Unable to load tunnels: {error}
+            </div>
+          </Card>
+        </ScaleIn>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {items.map((t, idx) => {
@@ -51,7 +69,7 @@ export default async function TunnelsPage() {
                 )}
                 {raw && (
                   <div className="rounded bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
-                    {raw.slice(0, 500)}{raw.length > 500 ? "…" : ""}
+                    {raw.slice(0, 280)}{raw.length > 280 ? "…" : ""}
                   </div>
                 )}
               </Card>
@@ -60,7 +78,7 @@ export default async function TunnelsPage() {
         })}
       </div>
 
-      {!items.length && (
+      {!error && !items.length && (
         <ScaleIn>
           <Card>
             <div className="py-8 text-center text-sm text-zinc-600">

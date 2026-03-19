@@ -1,10 +1,4 @@
 import { getMemories } from "@/lib/cortexaApi";
-import { PageHeader } from "@/components/page-header";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ScaleIn } from "@/components/ui/motion";
 
 export const dynamic = "force-dynamic";
 
@@ -19,111 +13,109 @@ export default async function MemoriesPage({
   const tag = typeof sp.tag === "string" ? sp.tag : "";
   const page = typeof sp.page === "string" ? Math.max(parseInt(sp.page, 10) || 1, 1) : 1;
 
-  const data = await getMemories({ q, source_type, tag, page, per_page: 20 });
+  let error: string | null = null;
+  let data = { items: [] as Awaited<ReturnType<typeof getMemories>>["items"], total: 0, page, per_page: 10 };
+
+  try {
+    data = await getMemories({ q, source_type, tag, page, per_page: 10 });
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Unknown error";
+  }
 
   return (
-    <>
-      <PageHeader
-        label="Memories"
-        title="Browse your memory store"
-        description="Filter by source type or tags. Search is semantic and indexed by your backend."
-      />
+    <div className="space-y-6">
+      <header className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="text-sm text-zinc-500">Memories</div>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Browse your memory store</h1>
+        <p className="mt-2 text-sm text-zinc-600">Filter by source type or tags. Search is semantic (best-effort).</p>
+      </header>
 
-      <ScaleIn delay={0.1}>
-        <Card>
-          <form className="space-y-4">
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-              <Input
-                name="q"
-                defaultValue={q}
-                placeholder="Search (semantic)..."
-              />
-              <Input
-                name="source_type"
-                defaultValue={source_type}
-                placeholder="source_type (text/link/pdf/...)"
-              />
-              <Input
-                name="tag"
-                defaultValue={tag}
-                placeholder="tag (e.g. fpga)"
-              />
-              <Button variant="primary">Apply</Button>
-            </div>
-          </form>
-        </Card>
-      </ScaleIn>
+      <form className="rounded-2xl border border-zinc-200 bg-white p-6">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Search (semantic)..."
+            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+          />
+          <input
+            name="source_type"
+            defaultValue={source_type}
+            placeholder="source_type (text/link/pdf/...)"
+            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+          />
+          <input
+            name="tag"
+            defaultValue={tag}
+            placeholder="tag (e.g. fpga)"
+            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+          />
+          <button className="h-10 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-white hover:bg-zinc-800">
+            Apply
+          </button>
+        </div>
+      </form>
 
-      <ScaleIn delay={0.2}>
-        <Card>
-          <div className="mb-4 flex items-center justify-between border-b border-zinc-200 pb-4">
-            <div className="text-sm text-zinc-600">
-              Showing <span className="font-semibold">{data.items.length}</span> of{" "}
-              <span className="font-semibold">{data.total}</span> memories (page{" "}
-              <span className="font-semibold">{data.page}</span>)
-            </div>
+      <section className="rounded-2xl border border-zinc-200 bg-white">
+        {error ? (
+          <div className="border-b border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            Unable to load memories: {error}
           </div>
-          <div className="divide-y divide-zinc-100">
-            {data.items.map((m, idx) => {
-              const title = (m.title as string) || (m.file_name as string) || (m.url as string) || "Untitled";
-              const st = (m.source_type as string) || "text";
-              const raw = (m.raw_content as string) || "";
-              const tagsArr = Array.isArray(m.tags) ? (m.tags as string[]) : [];
-              return (
-                <div key={(m.id as string) || `${idx}`} className="py-4 first:pt-0 last:pb-0">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <Badge>{st}</Badge>
-                    {m.id ? (
-                      <a
-                        className="text-sm font-semibold text-blue-600 hover:underline"
-                        href={`/memories/${m.id as string}`}
-                      >
-                        {title}
-                      </a>
-                    ) : (
-                      <div className="text-sm font-semibold text-zinc-900">{title}</div>
-                    )}
-                  </div>
-                  {m.url ? (
-                    <a
-                      className="mb-2 block break-all text-xs text-blue-600 hover:underline"
-                      href={m.url as string}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {m.url as string}
+        ) : null}
+        <div className="border-b border-zinc-200 p-4 text-sm text-zinc-600">
+          Showing {data.items.length} of {data.total} (page {data.page})
+        </div>
+        <div className="divide-y divide-zinc-100">
+          {data.items.map((m, idx) => {
+            const raw = (m.raw_content as string) || "";
+            const preview = raw.slice(0, 260);
+            const firstLine = raw
+              .split(/\r?\n/)
+              .map((l) => l.trim())
+              .find((l) => l.length > 0);
+            const title = (m.title as string) || firstLine || (m.file_name as string) || (m.url as string) || "Untitled";
+            const st = (m.source_type as string) || "text";
+            const tagsArr = Array.isArray(m.tags) ? (m.tags as string[]) : [];
+            return (
+              <div key={(m.id as string) || `${idx}`} className="p-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
+                  {m.id ? (
+                    <a className="text-sm font-medium text-blue-700 hover:underline" href={`/memories/${m.id as string}`}>
+                      {title}
                     </a>
-                  ) : null}
-                  {raw && (
-                    <div className="rounded bg-zinc-50 p-3 text-sm leading-6 text-zinc-700">
-                      {raw.slice(0, 300)}{raw.length > 300 ? "…" : ""}
-                    </div>
+                  ) : (
+                    <div className="text-sm font-medium">{title}</div>
                   )}
-                  {tagsArr.length ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {tagsArr.slice(0, 8).map((t) => (
-                        <Badge key={t} className="text-xs">
-                          {t}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
                 </div>
-              );
-            })}
-            {!data.items.length && (
-              <div className="py-8 text-center text-sm text-zinc-600">
-                No memories found. Try adjusting your filters.
+                {m.url ? (
+                  <a className="mt-1 block break-all text-sm text-blue-700 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+                    {m.url as string}
+                  </a>
+                ) : null}
+                {preview ? (
+                  <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700">
+                    {preview}{raw.length > preview.length ? "..." : ""}
+                  </div>
+                ) : null}
+                {tagsArr.length ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {tagsArr.slice(0, 8).map((t) => (
+                      <span key={t} className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            )}
-          </div>
-        </Card>
-      </ScaleIn>
+            );
+          })}
+          {!data.items.length ? <div className="p-6 text-sm text-zinc-600">No results.</div> : null}
+        </div>
+      </section>
 
-      <ScaleIn delay={0.3}>
-        <Pager page={data.page} total={data.total} perPage={data.per_page} q={q} source_type={source_type} tag={tag} />
-      </ScaleIn>
-    </>
+      <Pager page={data.page} total={data.total} perPage={data.per_page} q={q} source_type={source_type} tag={tag} />
+    </div>
   );
 }
 
@@ -157,16 +149,19 @@ function Pager({
 
   return (
     <div className="flex items-center justify-between">
-      <Button variant="ghost" disabled={page <= 1} onClick={() => (page > 1 ? window.location.href = mk(prev) : null)}>
-        ← Previous
-      </Button>
+      <a
+        className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50"
+        href={mk(prev)}
+        aria-disabled={page <= 1}
+      >
+        Prev
+      </a>
       <div className="text-sm text-zinc-600">
-        Page <span className="font-semibold">{page}</span> of{" "}
-        <span className="font-semibold">{maxPage}</span>
+        Page {page} / {maxPage}
       </div>
-      <Button variant="ghost" disabled={page >= maxPage} onClick={() => (page < maxPage ? window.location.href = mk(next) : null)}>
-        Next →
-      </Button>
+      <a className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50" href={mk(next)}>
+        Next
+      </a>
     </div>
   );
 }
