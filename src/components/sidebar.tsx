@@ -16,7 +16,7 @@ export function Sidebar() {
   };
 
   const links = [
-    { href: "/", label: "Dashboard", icon: "📊" },
+    { href: "/dashboard", label: "Dashboard", icon: "📊" },
     { href: "/memories", label: "Memories", icon: "💾" },
     { href: "/tunnels", label: "Tunnels", icon: "🌀" },
     { href: "/profile", label: "Profile", icon: "👤" },

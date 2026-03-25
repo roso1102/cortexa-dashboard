@@ -47,7 +47,7 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
           {m.id ? <span className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">id: {m.id as string}</span> : null}
         </div>
         {m.url ? (
-          <a className="mt-3 block break-all text-sm text-blue-700 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+          <a className="mt-3 block break-all text-sm text-zinc-700 hover:text-zinc-900 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
             {m.url as string}
           </a>
         ) : null}

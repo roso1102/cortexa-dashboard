@@ -139,7 +139,7 @@ export default async function MemoriesPage({
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
                   {memoryId ? (
-                    <a className="text-sm font-medium text-blue-700 hover:underline" href={`/memories/${memoryId}`}>
+                    <a className="text-sm font-medium text-zinc-800 hover:text-zinc-900 hover:underline" href={`/memories/${memoryId}`}>
                       {title}
                     </a>
                   ) : (
@@ -147,7 +147,7 @@ export default async function MemoriesPage({
                   )}
                 </div>
                 {m.url ? (
-                  <a className="mt-1 block break-all text-sm text-blue-700 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+                  <a className="mt-1 block break-all text-sm text-zinc-700 hover:text-zinc-900 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
                     {m.url as string}
                   </a>
                 ) : null}

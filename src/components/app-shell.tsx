@@ -12,6 +12,11 @@ type AppShellProps = {
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const isAuthRoute = pathname === "/login";
+  const isLandingRoute = pathname === "/";
+
+  if (isLandingRoute) {
+    return <>{children}</>;
+  }
 
   if (isAuthRoute) {
     return (

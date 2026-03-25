@@ -16,9 +16,9 @@ export default function LoginPage() {
 
   const getNextPath = () => {
     if (typeof window === "undefined") {
-      return "/";
+      return "/dashboard";
     }
-    const value = new URLSearchParams(window.location.search).get("next") || "/";
+    const value = new URLSearchParams(window.location.search).get("next") || "/dashboard";
     return value.startsWith("/") ? value : "/";
   };
 
