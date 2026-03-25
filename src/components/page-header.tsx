@@ -13,9 +13,9 @@ export function PageHeader({ label, title, description, children }: PageHeaderPr
   return (
     <FadeIn>
       <Card>
-        <div className="text-xs font-medium uppercase tracking-widest text-zinc-500">{label}</div>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">{title}</h1>
-        {description && <p className="mt-3 text-sm text-zinc-600">{description}</p>}
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">{label}</div>
+        <h1 className="mt-2 font-serif text-4xl leading-tight tracking-tight text-primary">{title}</h1>
+        {description && <p className="mt-3 text-sm text-copy-muted">{description}</p>}
         {children && <div className="mt-4">{children}</div>}
       </Card>
     </FadeIn>

@@ -6,11 +6,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 export function Button({ children, className = "", variant = "primary", ...props }: ButtonProps) {
-  const base = "inline-flex h-10 items-center justify-center rounded-xl px-4 text-sm font-medium transition-colors";
+  const base = "inline-flex h-10 items-center justify-center rounded-sm px-4 [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] transition-all";
   const styles =
     variant === "primary"
-      ? "bg-zinc-900 text-white hover:bg-zinc-800"
-      : "border border-zinc-200 bg-white text-zinc-800 hover:bg-zinc-50";
+      ? "bg-primary text-white hover:opacity-90"
+      : "border border-outline bg-white text-primary hover:bg-surface-low";
   return (
     <button className={`${base} ${styles} ${className}`} {...props}>
       {children}

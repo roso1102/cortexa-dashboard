@@ -17,11 +17,11 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
   if (!m) {
     return (
       <div className="space-y-6">
-        <header className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <div className="text-sm text-zinc-500">Memory</div>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Memory detail</h1>
+        <header className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">Memory</div>
+          <h1 className="mt-2 font-serif text-4xl tracking-tight text-primary">Memory detail</h1>
         </header>
-        <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+        <section className="rounded-lg border border-danger bg-danger-soft p-6 text-sm text-danger">
           Unable to load memory: {error || "Not found"}
         </section>
       </div>
@@ -39,26 +39,26 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-6">
-        <div className="text-sm text-zinc-500">Memory</div>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{title}</h1>
+      <header className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">Memory</div>
+        <h1 className="mt-2 font-serif text-4xl tracking-tight text-primary">{title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
-          {m.id ? <span className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">id: {m.id as string}</span> : null}
+          <span className="rounded-full bg-surface-low px-2 py-1 text-xs text-copy-muted">{st}</span>
+          {m.id ? <span className="rounded-full border border-outline px-2 py-1 text-xs text-copy-muted">id: {m.id as string}</span> : null}
         </div>
         {m.url ? (
-          <a className="mt-3 block break-all text-sm text-zinc-700 hover:text-zinc-900 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+          <a className="mt-3 block break-all text-sm text-copy-muted hover:text-primary hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
             {m.url as string}
           </a>
         ) : null}
       </header>
 
       {tagsArr.length ? (
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-          <div className="text-sm font-medium">Tags</div>
+        <section className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
+          <div className="text-sm font-semibold text-primary">Tags</div>
           <div className="mt-3 flex flex-wrap gap-2">
             {tagsArr.map((t) => (
-              <span key={t} className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">
+              <span key={t} className="rounded-full border border-outline px-2 py-1 text-xs text-copy-muted">
                 {t}
               </span>
             ))}
@@ -66,9 +66,9 @@ export default async function MemoryDetailPage({ params }: { params: Promise<{ i
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-zinc-200 bg-white p-6">
-        <div className="text-sm font-medium">Full text</div>
-        <pre className="mt-3 whitespace-pre-wrap text-sm leading-6 text-zinc-800">{raw}</pre>
+      <section className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
+        <div className="text-sm font-semibold text-primary">Full text</div>
+        <pre className="mt-3 whitespace-pre-wrap text-sm leading-6 text-copy">{raw}</pre>
       </section>
     </div>
   );

@@ -76,45 +76,45 @@ export default async function MemoriesPage({
 
   return (
     <div className="space-y-6">
-      <header className="rounded-2xl border border-zinc-200 bg-white p-6">
-        <div className="text-sm text-zinc-500">Memories</div>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Browse your memory store</h1>
-        <p className="mt-2 text-sm text-zinc-600">Filter by source type or tags. Search is semantic (best-effort).</p>
+      <header className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">Memories</div>
+        <h1 className="mt-2 font-serif text-4xl tracking-tight text-primary">Browse your memory store</h1>
+        <p className="mt-2 text-sm text-copy-muted">Filter by source type or tags. Search is semantic (best-effort).</p>
       </header>
 
-      <form className="rounded-2xl border border-zinc-200 bg-white p-6">
+      <form className="rounded-lg border border-outline bg-white p-6 shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <input
             name="q"
             defaultValue={q}
             placeholder="Search (semantic)..."
-            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+            className="h-10 rounded-sm border border-outline bg-white px-3 text-sm text-copy outline-none focus:border-primary-ink"
           />
           <input
             name="source_type"
             defaultValue={source_type}
             placeholder="source_type (text/link/pdf/...)"
-            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+            className="h-10 rounded-sm border border-outline bg-white px-3 text-sm text-copy outline-none focus:border-primary-ink"
           />
           <input
             name="tag"
             defaultValue={tag}
             placeholder="tag (e.g. fpga)"
-            className="h-10 rounded-xl border border-zinc-200 px-3 text-sm outline-none focus:border-zinc-400"
+            className="h-10 rounded-sm border border-outline bg-white px-3 text-sm text-copy outline-none focus:border-primary-ink"
           />
-          <button className="h-10 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-white hover:bg-zinc-800">
+          <button className="h-10 rounded-sm bg-primary px-3 text-sm font-semibold text-white hover:opacity-90">
             Apply
           </button>
         </div>
       </form>
 
-      <section className="rounded-2xl border border-zinc-200 bg-white">
+      <section className="rounded-lg border border-outline bg-white shadow-[0px_16px_40px_rgba(0,28,14,0.06)]">
         {error ? (
-          <div className="border-b border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="border-b border-danger bg-danger-soft p-4 text-sm text-danger">
             Unable to load memories: {error}
           </div>
         ) : null}
-        <div className="border-b border-zinc-200 p-4 text-sm text-zinc-600">
+        <div className="border-b border-outline p-4 text-sm text-copy-muted">
           Showing {data.items.length} of {data.total} (page {data.page})
         </div>
         {isTruncated ? (
@@ -122,7 +122,7 @@ export default async function MemoriesPage({
             Loaded the first {MAX_UNFILTERED_ITEMS} memories. Use search or filters to narrow down older items.
           </div>
         ) : null}
-        <div className="divide-y divide-zinc-100">
+        <div className="divide-y divide-outline/50">
           {data.items.map((m, idx) => {
             const raw = (m.raw_content as string) || "";
             const preview = raw.slice(0, 260);
@@ -137,9 +137,9 @@ export default async function MemoriesPage({
             return (
               <div key={`${(m.id as string) || "memory"}-${idx}`} className="p-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{st}</span>
+                  <span className="rounded-full bg-surface-low px-2 py-1 text-xs text-copy-muted">{st}</span>
                   {memoryId ? (
-                    <a className="text-sm font-medium text-zinc-800 hover:text-zinc-900 hover:underline" href={`/memories/${memoryId}`}>
+                    <a className="text-sm font-semibold text-primary hover:text-primary-ink hover:underline" href={`/memories/${memoryId}`}>
                       {title}
                     </a>
                   ) : (
@@ -147,19 +147,19 @@ export default async function MemoriesPage({
                   )}
                 </div>
                 {m.url ? (
-                  <a className="mt-1 block break-all text-sm text-zinc-700 hover:text-zinc-900 hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
+                  <a className="mt-1 block break-all text-sm text-copy-muted hover:text-primary hover:underline" href={m.url as string} target="_blank" rel="noreferrer">
                     {m.url as string}
                   </a>
                 ) : null}
                 {preview ? (
-                  <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700">
+                  <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-copy-muted">
                     {preview}{raw.length > preview.length ? "..." : ""}
                   </div>
                 ) : null}
                 {tagsArr.length ? (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {tagsArr.slice(0, 8).map((t) => (
-                      <span key={t} className="rounded-full border border-zinc-200 px-2 py-1 text-xs text-zinc-600">
+                      <span key={t} className="rounded-full border border-outline px-2 py-1 text-xs text-copy-muted">
                         {t}
                       </span>
                     ))}
@@ -168,7 +168,7 @@ export default async function MemoriesPage({
               </div>
             );
           })}
-          {!data.items.length ? <div className="p-6 text-sm text-zinc-600">No results.</div> : null}
+          {!data.items.length ? <div className="p-6 text-sm text-copy-muted">No results.</div> : null}
         </div>
       </section>
 
@@ -210,16 +210,16 @@ function Pager({
   return (
     <div className="flex items-center justify-between">
       <a
-        className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50"
+        className="rounded-sm border border-outline bg-white px-4 py-2 text-sm text-primary hover:bg-surface-low"
         href={mk(prev)}
         aria-disabled={page <= 1}
       >
         Prev
       </a>
-      <div className="text-sm text-zinc-600">
+      <div className="text-sm text-copy-muted">
         Page {page} / {maxPage}
       </div>
-      <a className="rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm hover:bg-zinc-50" href={mk(next)}>
+      <a className="rounded-sm border border-outline bg-white px-4 py-2 text-sm text-primary hover:bg-surface-low" href={mk(next)}>
         Next
       </a>
     </div>

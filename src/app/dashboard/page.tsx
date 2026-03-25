@@ -80,27 +80,27 @@ export default async function DashboardPage() {
         <Card>
           {error ? (
             <div className="space-y-2">
-              <div className="text-sm font-semibold text-red-600">Error loading summary</div>
-              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              <div className="text-sm font-semibold text-danger">Error loading summary</div>
+              <div className="rounded-sm border border-danger bg-danger-soft p-3 text-sm text-danger">
                 {error}
               </div>
-              <p className="mt-2 text-xs text-zinc-600">
+              <p className="mt-2 text-xs text-copy-muted">
                 Check your <code>NEXT_PUBLIC_API_URL</code> and make sure you are logged in with a valid dashboard token.
               </p>
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="text-sm font-semibold text-zinc-900">Summary</div>
-              <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-4">
+              <div className="text-sm font-semibold text-primary">Summary</div>
+              <div className="rounded-sm border border-outline bg-surface-low p-4">
                 {blocks.length ? (
-                  <div className="space-y-4 text-sm leading-7 text-zinc-800">
+                  <div className="space-y-4 text-sm leading-7 text-copy">
                     {blocks.map((block, idx) =>
                       block.kind === "paragraph" ? (
                         <p key={idx}>{block.text}</p>
                       ) : (
                         <div key={idx} className="space-y-2">
                           {block.heading ? (
-                            <div className="text-sm font-semibold text-zinc-900">{block.heading}</div>
+                            <div className="text-sm font-semibold text-primary">{block.heading}</div>
                           ) : null}
                           <ul className="list-disc space-y-1 pl-5">
                             {block.items.map((item, itemIdx) => (
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm leading-7 text-zinc-700">No summary generated yet.</p>
+                  <p className="text-sm leading-7 text-copy-muted">No summary generated yet.</p>
                 )}
               </div>
             </div>

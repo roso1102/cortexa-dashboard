@@ -80,14 +80,14 @@ export default function LoginPage() {
   return (
     <Card>
       <div className="mb-6">
-        <div className="text-xs font-medium uppercase tracking-widest text-zinc-500">Dashboard Login</div>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-zinc-900">Sign in to Cortexa</h1>
-        <p className="mt-2 text-sm text-zinc-600">Use your chat_id and dashboard password to continue.</p>
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">Dashboard Login</div>
+        <h1 className="mt-2 font-serif text-4xl tracking-tight text-primary">Sign in to Cortexa</h1>
+        <p className="mt-2 text-sm text-copy-muted">Use your chat_id and dashboard password to continue.</p>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="chat_id" className="text-sm font-medium text-zinc-700">
+          <label htmlFor="chat_id" className="text-sm font-semibold text-primary">
             chat_id
           </label>
           <Input
@@ -103,7 +103,7 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-medium text-zinc-700">
+          <label htmlFor="password" className="text-sm font-semibold text-primary">
             Password
           </label>
           <Input
@@ -119,7 +119,7 @@ export default function LoginPage() {
         </div>
 
         {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>
+          <div className="rounded-sm border border-danger bg-danger-soft p-3 text-sm text-danger">{error}</div>
         ) : null}
 
         <Button variant="primary" disabled={loading} className="w-full">

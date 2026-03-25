@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, Manrope, Newsreader } from "next/font/google";
+import { Manrope, Newsreader } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
-
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -34,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${bricolage.variable} ${manrope.variable} ${newsreader.variable} font-sans antialiased text-zinc-900`}>
+      <body className={`${manrope.variable} ${newsreader.variable} bg-surface font-sans antialiased text-copy`}>
         <AppShell>{children}</AppShell>
       </body>
     </html>

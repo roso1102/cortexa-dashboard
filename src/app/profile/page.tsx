@@ -27,21 +27,21 @@ export default async function ProfilePage() {
       <ScaleIn delay={0.1}>
         <Card>
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div className="rounded-sm border border-danger bg-danger-soft p-3 text-sm text-danger">
               Unable to load profile snapshot: {error}
             </div>
           ) : snapshot ? (
-            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-              <pre className="overflow-auto font-mono text-sm leading-6 text-zinc-800">
+            <div className="rounded-sm border border-outline bg-surface-low p-4">
+              <pre className="overflow-auto font-mono text-sm leading-6 text-copy">
                 {snapshot}
               </pre>
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-zinc-600">
+              <p className="text-sm text-copy-muted">
                 No profile snapshot generated yet.
               </p>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-copy-muted">
                 Snapshots are created automatically monthly, or you can request one via the
                 <code>/profile</code> command in Telegram.
               </p>

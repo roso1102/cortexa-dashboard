@@ -140,17 +140,17 @@ export default function LandingPage() {
         <div className="mx-auto flex w-full max-w-[1260px] items-center justify-between gap-4 px-4 py-4 md:px-8 md:py-5">
           <div className="font-serif text-[1.85rem] font-semibold tracking-tight">Cortexa</div>
           <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
-            <a href="#product" className="text-[#193025]">Product</a>
-            <a href="#features" className="text-[#193025]/70 transition hover:text-[#193025]">Features</a>
-            <a href="#about" className="text-[#193025]/70 transition hover:text-[#193025]">About</a>
+            <a href="#product" className="[font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] text-[#193025]">Product</a>
+            <a href="#features" className="[font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] text-[#193025]/70 transition hover:text-[#193025]">Features</a>
+            <a href="#about" className="[font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] text-[#193025]/70 transition hover:text-[#193025]">About</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="hidden text-sm font-semibold text-[#193025] md:inline-flex">
+            <Link href="/login" className="hidden [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] text-[#193025] md:inline-flex">
               Log In
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-sm bg-[#173424] px-4 py-2.5 text-sm font-semibold !text-white transition hover:bg-[#10281c]"
+              className="inline-flex items-center gap-2 rounded-sm bg-[#173424] px-4 py-2.5 [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] !text-white transition hover:bg-[#10281c]"
             >
               Get Started
               <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
@@ -166,7 +166,7 @@ export default function LandingPage() {
           <section id="product" className="relative overflow-hidden py-14 md:py-24">
             <div className="absolute -left-24 top-0 h-44 w-44 rounded-full bg-[#8f4f38]/10 blur-3xl" />
             <div className="absolute -right-20 top-16 h-48 w-48 rounded-full bg-[#173424]/10 blur-3xl" />
-            <p className="mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8f4f38]">The intellectual architect</p>
+            <p className="mb-6 [font-family:var(--font-manrope)] text-[11px] font-bold uppercase tracking-[0.24em] text-[#8f4f38]">The intellectual architect</p>
             <h1 className="max-w-5xl font-serif text-[2.85rem] leading-[0.98] tracking-tight text-[#173424] sm:text-[3.6rem] md:text-[4.6rem] lg:text-[6.2rem]">
               Memory without structure is storage. Memory with structure, time, and intelligence becomes
               <span className="ml-2 italic text-[#8f4f38] sm:ml-3"> cognition.</span>
@@ -177,14 +177,14 @@ export default function LandingPage() {
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 rounded-sm bg-[#173424] px-6 py-3.5 text-sm font-semibold !text-white transition hover:bg-[#10281c]"
+                className="inline-flex items-center gap-2 rounded-sm bg-[#173424] px-6 py-3.5 [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] !text-white transition hover:bg-[#10281c]"
               >
                 Start Your Free Trial
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
                   <path d="M5 10h10m0 0-3.5-3.5M15 10l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </Link>
-              <button className="rounded-sm border border-[#173424]/20 bg-white/60 px-6 py-3.5 text-sm font-semibold text-[#173424] transition hover:bg-white">
+              <button className="rounded-sm border border-[#173424]/20 bg-white/60 px-6 py-3.5 [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] text-[#173424] transition hover:bg-white">
                 Watch the Demo
               </button>
             </div>
@@ -326,7 +326,7 @@ export default function LandingPage() {
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 rounded-sm bg-[#cf7348] px-7 py-3.5 text-sm font-semibold !text-white transition hover:bg-[#b7653e]"
+                className="inline-flex items-center gap-2 rounded-sm bg-[#cf7348] px-7 py-3.5 [font-family:var(--font-manrope)] text-sm font-bold tracking-[-0.01em] !text-white transition hover:bg-[#b7653e]"
               >
                 Get Started Today
                 <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>

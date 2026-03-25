@@ -20,7 +20,8 @@ export function AppShell({ children }: AppShellProps) {
 
   if (isAuthRoute) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-white via-white to-zinc-50 px-4 py-8">
+      <div className="min-h-screen bg-surface px-4 py-8">
+        <div className="pointer-events-none fixed inset-0 editorial-grid opacity-10" />
         <div className="mx-auto w-full max-w-md">
           <FadeIn>{children}</FadeIn>
         </div>
@@ -29,7 +30,8 @@ export function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-white to-zinc-50">
+    <div className="min-h-screen bg-surface">
+      <div className="pointer-events-none fixed inset-0 editorial-grid opacity-10" />
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 md:flex-row md:gap-6 md:py-8">
         <Sidebar />
         <main className="min-w-0 flex-1">
@@ -38,7 +40,7 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </main>
       </div>
-      <footer className="mx-auto w-full max-w-7xl px-4 pb-8 text-center text-xs text-zinc-500">
+      <footer className="mx-auto w-full max-w-7xl px-4 pb-8 text-center text-xs text-copy-muted">
         <p>Powered by Koyeb + Pinecone + Gemini + Groq/OpenRouter.</p>
       </footer>
     </div>

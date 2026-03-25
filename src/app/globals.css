@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-white: white;
-  --color-zinc-50: #fafafa;
-  --color-zinc-100: #f4f4f5;
-  --color-zinc-200: #e4e4e7;
-  --color-zinc-500: #71717a;
-  --color-zinc-600: #52525b;
-  --color-zinc-700: #3f3f46;
-  --color-zinc-900: #18181b;
+  --color-surface: #fcf9f2;
+  --color-surface-low: #f6f3ec;
+  --color-surface-high: #ebe8e1;
+  --color-surface-variant: #e5e2db;
+  --color-primary: #1b3022;
+  --color-primary-ink: #2e4d3b;
+  --color-secondary: #8b4f34;
+  --color-secondary-soft: #ffb191;
+  --color-outline: #c3c8c1;
+  --color-copy: #1c1c18;
+  --color-copy-muted: #434843;
+  --color-danger: #ba1a1a;
+  --color-danger-soft: #ffdad6;
 
-  --font-sans: var(--font-bricolage), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
 }
 
@@ -20,19 +25,24 @@
 
 html,
 body {
-  background: white;
-  color: #18181b;
-  font-family: var(--font-bricolage), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--color-surface);
+  color: var(--color-copy);
+  font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-  @apply text-zinc-800 hover:text-zinc-900;
+  @apply text-primary hover:text-primary-ink;
 }
 
 code {
-  @apply rounded bg-zinc-100 px-1 py-0.5 text-xs text-zinc-700;
+  @apply rounded-sm bg-surface-variant px-1 py-0.5 text-xs text-copy-muted;
+}
+
+.editorial-grid {
+  background-image: radial-gradient(circle, #c3c8c1 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
 /* Smooth scrollbar */
@@ -46,10 +56,10 @@ code {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
+  background: #c3c8c1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a8;
+  background: #737973;
 }
