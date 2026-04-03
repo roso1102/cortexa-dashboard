@@ -117,7 +117,7 @@ export default function TunnelsPage() {
                   onChange={(e) => setShowLegacyList(e.target.checked)}
                   className="h-4 w-4 rounded border border-outline"
                 />
-                Show legacy list (>= 1 memory)
+                Show legacy list (&gt;= 1 memory)
               </label>
               <Button
                 type="button"
