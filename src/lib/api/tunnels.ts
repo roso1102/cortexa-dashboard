@@ -1,11 +1,3 @@
-function baseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!raw) {
-    throw new Error("Missing API URL config: set NEXT_PUBLIC_API_URL (or NEXT_PUBLIC_API_BASE_URL)");
-  }
-  return raw.replace(/\/+$/, "");
-}
-
 export type GeneratedTunnel = {
   id?: string;
   tunnel_name?: string;
@@ -22,14 +14,18 @@ export type GenerateTunnelsResponse = {
   generated_at: string;
 };
 
-export async function generateTunnelsNow(token: string): Promise<GenerateTunnelsResponse> {
-  const res = await fetch(`${baseUrl()}/api/tunnels/generate`, {
-    method: "POST",
+export type TunnelListResponse = {
+  tunnels: GeneratedTunnel[];
+};
+
+async function proxyFetch<T>(path: string, token: string, method: "GET" | "POST"): Promise<T> {
+  const res = await fetch(path, {
+    method,
     headers: {
       "Content-Type": "application/json",
       "X-Dashboard-Token": token,
     },
-    body: JSON.stringify({}),
+    body: method === "POST" ? JSON.stringify({}) : undefined,
     cache: "no-store",
   });
 
@@ -43,5 +39,13 @@ export async function generateTunnelsNow(token: string): Promise<GenerateTunnels
     throw Object.assign(new Error(message), { status: res.status, data });
   }
 
-  return data as GenerateTunnelsResponse;
+  return data as T;
+}
+
+export async function getTunnelsNow(token: string): Promise<TunnelListResponse> {
+  return proxyFetch<TunnelListResponse>("/api/tunnels", token, "GET");
+}
+
+export async function generateTunnelsNow(token: string): Promise<GenerateTunnelsResponse> {
+  return proxyFetch<GenerateTunnelsResponse>("/api/tunnels/generate", token, "POST");
 }

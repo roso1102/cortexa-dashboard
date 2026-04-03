@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { ScaleIn } from "@/components/ui/motion";
 import { Button } from "@/components/ui/button";
 import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
-import { getTunnels, type MemoryItem } from "@/lib/cortexaApi";
-import { generateTunnelsNow } from "@/lib/api/tunnels";
+import { type MemoryItem } from "@/lib/cortexaApi";
+import { generateTunnelsNow, getTunnelsNow } from "@/lib/api/tunnels";
 import { toast } from "sonner";
 
 export const dynamic = "force-dynamic";
@@ -24,8 +24,15 @@ export default function TunnelsPage() {
   const refetchTunnels = useCallback(async () => {
     setError(null);
     setIsLoading(true);
+    const token = window.localStorage.getItem(DASHBOARD_TOKEN_KEY) || "";
+    if (!token) {
+      setError("Missing dashboard token. Please sign in again.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const res = await getTunnels();
+      const res = await getTunnelsNow(token);
       setTunnels(res.tunnels ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
@@ -101,9 +108,20 @@ export default function TunnelsPage() {
                 </div>
               ) : null}
             </div>
-            <Button onClick={onGenerateTunnels} disabled={isGenerating} className="disabled:cursor-not-allowed disabled:opacity-60">
-              {isGenerating ? "Generating..." : "Generate Tunnels Now"}
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={refetchTunnels}
+                disabled={isLoading || isGenerating}
+                className="disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Refresh List
+              </Button>
+              <Button onClick={onGenerateTunnels} disabled={isGenerating} className="disabled:cursor-not-allowed disabled:opacity-60">
+                {isGenerating ? "Generating..." : "Generate Tunnels Now"}
+              </Button>
+            </div>
           </div>
         </Card>
       </ScaleIn>
@@ -124,6 +142,10 @@ export default function TunnelsPage() {
             <div className="py-6 text-sm text-copy-muted">Loading tunnels...</div>
           </Card>
         </ScaleIn>
+      ) : null}
+
+      {!isLoading && !error ? (
+        <div className="text-sm text-copy-muted">Showing {items.length} tunnel{items.length === 1 ? "" : "s"}.</div>
       ) : null}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

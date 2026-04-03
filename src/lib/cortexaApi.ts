@@ -18,9 +18,9 @@ export type MemoryItem = Record<string, unknown> & {
 };
 
 function baseUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  const raw = process.env.NEXT_PUBLIC_API_URL;
   if (!raw) {
-    throw new Error("Missing API URL config: set NEXT_PUBLIC_API_URL (or NEXT_PUBLIC_API_BASE_URL)");
+    throw new Error("Missing API URL config: set NEXT_PUBLIC_API_URL");
   }
   return raw.replace(/\/+$/, "");
 }

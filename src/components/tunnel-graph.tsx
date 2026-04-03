@@ -2,27 +2,36 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export type TunnelGraphNode = {
+export type TunnelGraphRenderNode = {
   id: string;
   label: string;
-  kind: "center" | "memory" | "tag" | "date";
+  snippet?: string;
+  sourceType?: string;
+  tags?: string[];
+  kind?: "memory" | "tag";
   memoryHref?: string;
   externalUrl?: string;
   details?: string;
 };
 
-export type TunnelGraphLink = {
+export type TunnelGraphEdgeLink = {
+  id: string;
   source: string;
   target: string;
+  rationale: string;
+  weight: number;
+  bridgeScore: number;
 };
 
 type TunnelGraphProps = {
-  nodes: TunnelGraphNode[];
-  links: TunnelGraphLink[];
+  nodes: TunnelGraphRenderNode[];
+  links: TunnelGraphEdgeLink[];
   height?: number;
+  onEdgeSelect?: (edge: TunnelGraphEdgeLink | null) => void;
+  onEdgeHover?: (edge: TunnelGraphEdgeLink | null) => void;
 };
 
-type SimNode = TunnelGraphNode & {
+type SimNode = TunnelGraphRenderNode & {
   x: number;
   y: number;
   vx: number;
@@ -35,10 +44,25 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
+function edgeDistanceSquared(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const abx = bx - ax;
+  const aby = by - ay;
+  const apx = px - ax;
+  const apy = py - ay;
+  const abLenSq = abx * abx + aby * aby;
+  if (abLenSq <= 0.0001) return apx * apx + apy * apy;
+  const t = clamp((apx * abx + apy * aby) / abLenSq, 0, 1);
+  const cx = ax + abx * t;
+  const cy = ay + aby * t;
+  const dx = px - cx;
+  const dy = py - cy;
+  return dx * dx + dy * dy;
+}
+
+export function TunnelGraph({ nodes, links, height = 560, onEdgeSelect, onEdgeHover }: TunnelGraphProps) {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const worldRef = useRef<{ nodes: SimNode[]; links: Array<{ source: number; target: number }> }>({
+  const worldRef = useRef<{ nodes: SimNode[]; links: Array<{ id: string; source: number; target: number }> }>({
     nodes: [],
     links: [],
   });
@@ -47,6 +71,8 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
   const [hint, setHint] = useState("Drag nodes to explore. Scroll to zoom. Drag empty space to pan.");
   const [size, setSize] = useState({ width: 900, height });
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -58,8 +84,9 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
     const simNodes: SimNode[] = nodes.map((node, idx) => {
       indexed.set(node.id, idx);
       const angle = (idx / Math.max(nodes.length, 1)) * Math.PI * 2;
-      const radius = node.kind === "center" ? 8 : node.kind === "date" ? 4 : 5;
-      const spread = node.kind === "center" ? 0 : 120 + (idx % 6) * 26;
+      const kind = node.kind || "memory";
+      const radius = kind === "tag" ? 4 : 6;
+      const spread = 80 + (idx % 7) * 24;
       return {
         ...node,
         x: Math.cos(angle) * spread,
@@ -73,10 +100,14 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
 
     const simLinks = links
       .map((link) => ({
+        id: link.id,
         source: indexed.get(link.source),
         target: indexed.get(link.target),
       }))
-      .filter((link): link is { source: number; target: number } => link.source !== undefined && link.target !== undefined);
+      .filter(
+        (link): link is { id: string; source: number; target: number } =>
+          link.source !== undefined && link.target !== undefined,
+      );
 
     return { simNodes, simLinks };
   }, [links, nodes]);
@@ -152,7 +183,7 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
         const dx = target.x - source.x;
         const dy = target.y - source.y;
         const distance = Math.max(1, Math.hypot(dx, dy));
-        const targetLength = source.kind === "center" || target.kind === "center" ? 150 : 100;
+        const targetLength = source.kind === "tag" || target.kind === "tag" ? 80 : 120;
         const tension = (distance - targetLength) * 0.006;
         const fx = (dx / distance) * tension;
         const fy = (dy / distance) * tension;
@@ -191,11 +222,19 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
       ctx.translate(panX, panY);
       ctx.scale(zoom, zoom);
 
-      ctx.strokeStyle = "rgba(213,222,236,0.36)";
-      ctx.lineWidth = 1 / zoom;
       for (const link of simLinks) {
         const source = simNodes[link.source];
         const target = simNodes[link.target];
+
+        const selected = selectedEdgeId === link.id;
+        const hovered = hoveredEdgeId === link.id;
+        ctx.strokeStyle = selected
+          ? "rgba(255,255,255,0.95)"
+          : hovered
+            ? "rgba(200,230,255,0.9)"
+            : "rgba(213,222,236,0.36)";
+        ctx.lineWidth = (selected ? 2.2 : hovered ? 1.6 : 1) / zoom;
+
         ctx.beginPath();
         ctx.moveTo(source.x, source.y);
         ctx.lineTo(target.x, target.y);
@@ -203,14 +242,8 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
       }
 
       for (const node of simNodes) {
-        const fill =
-          node.kind === "center"
-            ? "#5aa7e0"
-            : node.kind === "tag"
-              ? "#f19783"
-              : node.kind === "date"
-                ? "#71b6eb"
-                : "#4f90c2";
+        const kind = node.kind || "memory";
+        const fill = kind === "tag" ? "#f19783" : "#4f90c2";
 
         ctx.beginPath();
         ctx.fillStyle = fill;
@@ -270,6 +303,26 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
     return null;
   };
 
+  const pickEdge = (screenX: number, screenY: number): string | null => {
+    const worldPos = toWorld(screenX, screenY);
+    const simNodes = worldRef.current.nodes;
+    const simLinks = worldRef.current.links;
+    let bestId: string | null = null;
+    let bestDistance = 999999;
+
+    for (const link of simLinks) {
+      const source = simNodes[link.source];
+      const target = simNodes[link.target];
+      const distanceSq = edgeDistanceSquared(worldPos.x, worldPos.y, source.x, source.y, target.x, target.y);
+      if (distanceSq < bestDistance) {
+        bestDistance = distanceSq;
+        bestId = link.id;
+      }
+    }
+
+    return bestDistance <= 56 ? bestId : null;
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -289,10 +342,17 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+
+    if (!dragRef.current || dragRef.current.pointerId !== e.pointerId) {
+      const hoverEdge = pickEdge(x, y);
+      setHoveredEdgeId(hoverEdge);
+      onEdgeHover?.(links.find((entry) => entry.id === hoverEdge) || null);
+      return;
+    }
+
     const moveDx = x - dragRef.current.startX;
     const moveDy = y - dragRef.current.startY;
     if (!dragRef.current.moved && Math.hypot(moveDx, moveDy) > 3) {
@@ -314,6 +374,10 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
       dragRef.current.lastX = x;
       dragRef.current.lastY = y;
     }
+
+    const hoverEdge = pickEdge(x, y);
+    setHoveredEdgeId(hoverEdge);
+    onEdgeHover?.(links.find((entry) => entry.id === hoverEdge) || null);
   };
 
   const clearDrag = (pointerId: number, canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
@@ -332,7 +396,25 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
       if (nodeIndex !== null) {
         const clicked = worldRef.current.nodes[nodeIndex];
         setSelectedNodeId(clicked.id);
+        setSelectedEdgeId(null);
+        onEdgeSelect?.(null);
+        onEdgeHover?.(null);
         setHint("Node selected. Use actions below to open saved content.");
+      } else {
+        const edgeId = pickEdge(x, y);
+        if (edgeId) {
+          setSelectedNodeId(null);
+          setSelectedEdgeId(edgeId);
+          const edge = links.find((entry) => entry.id === edgeId) || null;
+          onEdgeSelect?.(edge);
+          onEdgeHover?.(edge);
+          setHint("Edge selected. Review rationale below.");
+        } else {
+          setSelectedNodeId(null);
+          setSelectedEdgeId(null);
+          onEdgeSelect?.(null);
+          onEdgeHover?.(null);
+        }
       }
     }
 
@@ -358,6 +440,11 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
     transformRef.current.panY = y - worldBefore.y * nextZoom;
   };
 
+  const onPointerLeave = () => {
+    setHoveredEdgeId(null);
+    onEdgeHover?.(null);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between text-xs text-copy-muted">
@@ -372,6 +459,7 @@ export function TunnelGraph({ nodes, links, height = 560 }: TunnelGraphProps) {
           onPointerMove={onPointerMove}
           onPointerUp={(e) => clearDrag(e.pointerId, e.currentTarget, e.clientX, e.clientY)}
           onPointerCancel={(e) => clearDrag(e.pointerId, e.currentTarget, e.clientX, e.clientY)}
+          onPointerLeave={onPointerLeave}
           onWheel={onWheel}
         />
       </div>
