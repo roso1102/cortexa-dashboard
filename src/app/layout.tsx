@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Newsreader } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { Toaster } from "sonner";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -30,6 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${manrope.variable} ${newsreader.variable} bg-surface font-sans antialiased text-copy`}>
         <AppShell>{children}</AppShell>
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

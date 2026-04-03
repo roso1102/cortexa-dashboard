@@ -1,32 +1,86 @@
-import { getTunnels } from "@/lib/cortexaApi";
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScaleIn } from "@/components/ui/motion";
+import { Button } from "@/components/ui/button";
+import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
+import { getTunnels, type MemoryItem } from "@/lib/cortexaApi";
+import { generateTunnelsNow } from "@/lib/api/tunnels";
+import { toast } from "sonner";
 
 export const dynamic = "force-dynamic";
 
-export default async function TunnelsPage() {
-  let tunnels: Awaited<ReturnType<typeof getTunnels>>["tunnels"] = [];
-  let error: string | null = null;
+export default function TunnelsPage() {
+  const [tunnels, setTunnels] = useState<MemoryItem[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [lastGeneratedAt, setLastGeneratedAt] = useState<string | null>(null);
 
-  try {
-    const res = await getTunnels();
-    tunnels = res.tunnels;
-  } catch (e) {
-    error = e instanceof Error ? e.message : "Unknown error";
+  const refetchTunnels = useCallback(async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const res = await getTunnels();
+      setTunnels(res.tunnels ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unknown error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refetchTunnels();
+  }, [refetchTunnels]);
+
+  async function onGenerateTunnels() {
+    if (isGenerating) return;
+
+    const token = window.localStorage.getItem(DASHBOARD_TOKEN_KEY) || "";
+    if (!token) {
+      toast.error("Missing dashboard token. Please sign in again.");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const result = await generateTunnelsNow(token);
+      setLastGeneratedAt(result.generated_at || null);
+      if (result.count > 0) {
+        toast.success(`Generated ${result.count} tunnel(s).`);
+      } else {
+        toast.success("No new tunnels generated (not enough overlapping memories/tags yet).");
+        toast.info("Need at least 3 memories sharing overlapping tag tokens.");
+      }
+      await refetchTunnels();
+    } catch (err: unknown) {
+      const errorLike = err as { status?: number; message?: string };
+      if (errorLike?.status === 409 && errorLike?.message === "generation_in_progress") {
+        toast.info("Tunnel generation already running. Please wait.");
+      } else {
+        toast.error(`Failed to generate tunnels: ${errorLike?.message || "Unknown error"}`);
+      }
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   // Deduplicate by id if present
-  const seen = new Set<string>();
-  const items = tunnels.filter((t) => {
-    const id = (t.id as string) || "";
-    if (!id) return true;
-    if (seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
+  const items = useMemo(() => {
+    const seen = new Set<string>();
+    return tunnels.filter((t) => {
+      const id = (t.id as string) || "";
+      if (!id) return true;
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  }, [tunnels]);
 
   return (
     <>
@@ -36,12 +90,38 @@ export default async function TunnelsPage() {
         description="Weekly theme clusters automatically named by the LLM. Explore how memories group together."
       />
 
+      <ScaleIn delay={0.05}>
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-sm text-copy-muted">Run tunnel generation now, then refresh this list automatically.</div>
+              {lastGeneratedAt ? (
+                <div className="mt-1 text-xs text-copy-muted">
+                  Last generated at: {new Date(lastGeneratedAt).toLocaleString()}
+                </div>
+              ) : null}
+            </div>
+            <Button onClick={onGenerateTunnels} disabled={isGenerating} className="disabled:cursor-not-allowed disabled:opacity-60">
+              {isGenerating ? "Generating..." : "Generate Tunnels Now"}
+            </Button>
+          </div>
+        </Card>
+      </ScaleIn>
+
       {error ? (
         <ScaleIn delay={0.1}>
           <Card>
             <div className="rounded-sm border border-danger bg-danger-soft p-3 text-sm text-danger">
               Unable to load tunnels: {error}
             </div>
+          </Card>
+        </ScaleIn>
+      ) : null}
+
+      {isLoading && !error ? (
+        <ScaleIn delay={0.1}>
+          <Card>
+            <div className="py-6 text-sm text-copy-muted">Loading tunnels...</div>
           </Card>
         </ScaleIn>
       ) : null}
@@ -94,7 +174,7 @@ export default async function TunnelsPage() {
         })}
       </div>
 
-      {!error && !items.length && (
+      {!isLoading && !error && !items.length && (
         <ScaleIn>
           <Card>
             <div className="py-8 text-center text-sm text-copy-muted">
