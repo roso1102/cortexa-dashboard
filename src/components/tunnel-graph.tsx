@@ -18,6 +18,8 @@ export type TunnelGraphEdgeLink = {
   id: string;
   source: string;
   target: string;
+  fromMemoryId?: string;
+  toMemoryId?: string;
   rationale: string;
   weight: number;
   bridgeScore: number;

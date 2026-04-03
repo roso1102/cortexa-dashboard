@@ -8,18 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { ScaleIn } from "@/components/ui/motion";
 import { Button } from "@/components/ui/button";
 import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
-import { type MemoryItem } from "@/lib/cortexaApi";
-import { generateTunnelsNow, getTunnelsNow } from "@/lib/api/tunnels";
+import { fetchTunnels, type TunnelListItem } from "@/lib/api";
+import { generateTunnelsNow } from "@/lib/api/tunnels";
 import { toast } from "sonner";
 
 export const dynamic = "force-dynamic";
 
 export default function TunnelsPage() {
-  const [tunnels, setTunnels] = useState<MemoryItem[]>([]);
+  const [tunnels, setTunnels] = useState<TunnelListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGeneratedAt, setLastGeneratedAt] = useState<string | null>(null);
+  const [showLegacyList, setShowLegacyList] = useState(false);
 
   const refetchTunnels = useCallback(async () => {
     setError(null);
@@ -32,14 +33,14 @@ export default function TunnelsPage() {
     }
 
     try {
-      const res = await getTunnelsNow(token);
+      const res = await fetchTunnels(token, showLegacyList ? 1 : 4);
       setTunnels(res.tunnels ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unknown error");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [showLegacyList]);
 
   useEffect(() => {
     void refetchTunnels();
@@ -109,6 +110,15 @@ export default function TunnelsPage() {
               ) : null}
             </div>
             <div className="flex flex-wrap gap-2">
+              <label className="inline-flex items-center gap-2 px-2 text-xs text-copy-muted">
+                <input
+                  type="checkbox"
+                  checked={showLegacyList}
+                  onChange={(e) => setShowLegacyList(e.target.checked)}
+                  className="h-4 w-4 rounded border border-outline"
+                />
+                Show legacy list (>= 1 memory)
+              </label>
               <Button
                 type="button"
                 variant="ghost"
