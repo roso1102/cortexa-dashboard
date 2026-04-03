@@ -198,23 +198,65 @@ export function TunnelDetailGraphClient({ tunnelId }: TunnelDetailGraphClientPro
       />
 
       {edgeForPanel ? (
-        <div className="rounded-sm border border-outline bg-surface-low p-3 text-sm text-primary">
-          <h4 className="text-sm font-semibold">Why these are linked</h4>
-          <p className="mt-2 text-copy-muted">{edgeForPanel.rationale || "No rationale available."}</p>
-          <small className="mt-2 block text-copy-muted">
-            Bridge: {edgeForPanel.bridgeScore.toFixed(2)} | Similarity: {edgeForPanel.weight.toFixed(2)}
-          </small>
-          {explainLoading ? <p className="mt-2 text-xs text-copy-muted">Loading explanation...</p> : null}
-          {explainError ? <p className="mt-2 text-xs text-danger">{explainError}</p> : null}
-          {explanation?.summary ? <p className="mt-2 text-copy-muted">{explanation.summary}</p> : null}
-          {Array.isArray(explanation?.evidence) && explanation.evidence.length > 0 ? (
-            <ul className="mt-2 list-disc pl-5 text-xs text-copy-muted">
-              {explanation.evidence.map((item, idx) => (
-                <li key={`${edgeForPanel.id}-evidence-${idx}`}>{item.quote || "No quote provided."}</li>
-              ))}
-            </ul>
+        <div className="space-y-4 rounded-sm border border-outline bg-surface-low p-4">
+          <div>
+            <h3 className="text-sm font-bold text-primary">Why these are linked</h3>
+            <p className="mt-1 text-sm text-copy">{edgeForPanel.rationale || "No direct rationale provided."}</p>
+          </div>
+
+          <div className="flex gap-4 rounded-sm bg-white/5 p-3">
+            <div className="flex-1">
+              <div className="text-xs font-semibold text-copy-muted uppercase tracking-wide">Semantic Bridge</div>
+              <div className="mt-1 text-lg font-bold text-primary">{(edgeForPanel.bridgeScore * 100).toFixed(0)}%</div>
+            </div>
+            <div className="flex-1">
+              <div className="text-xs font-semibold text-copy-muted uppercase tracking-wide">Similarity</div>
+              <div className="mt-1 text-lg font-bold text-primary">{(edgeForPanel.weight * 100).toFixed(0)}%</div>
+            </div>
+          </div>
+
+          {explainLoading ? (
+            <div className="flex items-center gap-2 text-sm text-copy-muted">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-copy-muted border-t-primary"></div>
+              Loading detailed explanation...
+            </div>
           ) : null}
-          {explanation?.fallback ? <p className="mt-2 text-xs text-copy-muted">Note: explanation used fallback reasoning.</p> : null}
+
+          {!explainLoading && explanation ? (
+            <div className="space-y-3">
+              {explanation.summary ? (
+                <div>
+                  <div className="text-xs font-semibold text-copy-muted uppercase tracking-wide">Summary</div>
+                  <p className="mt-1 text-sm text-copy-muted">{explanation.summary}</p>
+                </div>
+              ) : null}
+
+              {Array.isArray(explanation.evidence) && explanation.evidence.length > 0 ? (
+                <div>
+                  <div className="text-xs font-semibold text-copy-muted uppercase tracking-wide">Evidence</div>
+                  <ul className="mt-2 space-y-2">
+                    {explanation.evidence.map((item, idx) => (
+                      <li key={`${edgeForPanel.id}-evidence-${idx}`} className="rounded-sm bg-white/5 p-2 text-xs text-copy-muted border-l-2 border-primary pl-3">
+                        {item.quote || "No quote provided."}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {explanation.fallback ? (
+                <div className="rounded-sm bg-amber-50 p-2 text-xs text-amber-900">
+                  ⚠ This explanation used fallback reasoning (full analysis not available).
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {explainError ? (
+            <div className="rounded-sm bg-danger-soft p-2 text-xs text-danger">
+              Could not load explanation: {explainError}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

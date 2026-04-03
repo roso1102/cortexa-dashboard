@@ -70,7 +70,7 @@ export function TunnelGraph({ nodes, links, height = 560, onEdgeSelect, onEdgeHo
   });
   const transformRef = useRef({ zoom: 1, panX: 0, panY: 0 });
   const dragRef = useRef<{ type: "node" | "pan"; nodeIndex?: number; pointerId: number; lastX: number; lastY: number; startX: number; startY: number; moved: boolean } | null>(null);
-  const [hint, setHint] = useState("Drag nodes to explore. Scroll to zoom. Drag empty space to pan.");
+  const [hint, setHint] = useState("Drag nodes to explore. Scroll to zoom. Drag empty space to pan. Click edges to see why.");
   const [size, setSize] = useState({ width: 900, height });
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
@@ -322,7 +322,7 @@ export function TunnelGraph({ nodes, links, height = 560, onEdgeSelect, onEdgeHo
       }
     }
 
-    return bestDistance <= 56 ? bestId : null;
+    return bestDistance <= 100 ? bestId : null;
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -352,6 +352,11 @@ export function TunnelGraph({ nodes, links, height = 560, onEdgeSelect, onEdgeHo
       const hoverEdge = pickEdge(x, y);
       setHoveredEdgeId(hoverEdge);
       onEdgeHover?.(links.find((entry) => entry.id === hoverEdge) || null);
+      if (hoverEdge && !dragRef.current) {
+        setHint("✨ Hover over edge to preview. Click to see detailed reasoning.");
+      } else if (!dragRef.current) {
+        setHint("Drag nodes to explore. Scroll to zoom. Drag empty space to pan. Click edges to see why.");
+      }
       return;
     }
 
@@ -410,19 +415,20 @@ export function TunnelGraph({ nodes, links, height = 560, onEdgeSelect, onEdgeHo
           const edge = links.find((entry) => entry.id === edgeId) || null;
           onEdgeSelect?.(edge);
           onEdgeHover?.(edge);
-          setHint("Edge selected. Review rationale below.");
+          setHint("✓ Edge selected. See reasoning below.");
         } else {
           setSelectedNodeId(null);
           setSelectedEdgeId(null);
           onEdgeSelect?.(null);
           onEdgeHover?.(null);
+          setHint("Drag nodes to explore. Scroll to zoom. Drag empty space to pan. Click edges to see why.");
         }
       }
     }
 
     dragRef.current = null;
     if (drag.moved) {
-      setHint("Drag nodes to explore. Scroll to zoom. Drag empty space to pan.");
+      setHint("Drag nodes to explore. Scroll to zoom. Drag empty space to pan. Click edges to see why.");
     }
   };
 
