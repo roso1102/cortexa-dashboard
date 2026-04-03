@@ -1,13 +1,8 @@
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Missing required env var: ${name}`);
-  }
-  return value;
-}
-
 function baseUrl(): string {
-  const raw = requireEnv("NEXT_PUBLIC_API_URL");
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (!raw) {
+    throw new Error("Missing API URL config: set NEXT_PUBLIC_API_URL (or NEXT_PUBLIC_API_BASE_URL)");
+  }
   return raw.replace(/\/+$/, "");
 }
 
