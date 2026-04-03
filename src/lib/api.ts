@@ -52,9 +52,9 @@ async function parseError(res: Response, label: string): Promise<never> {
   throw new Error(`${label} (${res.status}): ${txt}`);
 }
 
-export async function fetchTunnels(token: string, minMemoryCount = 4): Promise<TunnelListResponse> {
+export async function fetchTunnels(token: string): Promise<TunnelListResponse> {
   const base = getApiBase();
-  const res = await fetch(`${base}/api/tunnels?min_memory_count=${encodeURIComponent(String(minMemoryCount))}`, {
+  const res = await fetch(`${base}/api/tunnels`, {
     method: "GET",
     headers: {
       "X-Dashboard-Token": token,

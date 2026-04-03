@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TunnelGraph, type TunnelGraphEdgeLink, type TunnelGraphRenderNode } from "@/components/tunnel-graph";
 import { DASHBOARD_TOKEN_KEY } from "@/lib/auth";
 import { explainTunnelEdge, fetchTunnelGraph, rebuildTunnelEdges, type TunnelEdgeExplainResponse } from "@/lib/api";
@@ -12,7 +12,6 @@ type TunnelDetailGraphClientProps = {
 export function TunnelDetailGraphClient({ tunnelId }: TunnelDetailGraphClientProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showRawTagNodes, setShowRawTagNodes] = useState(false);
   const [dropWeakEdges, setDropWeakEdges] = useState(false);
   const [isRebuilding, setIsRebuilding] = useState(false);
   const [selectedEdge, setSelectedEdge] = useState<TunnelGraphEdgeLink | null>(null);
@@ -149,50 +148,6 @@ export function TunnelDetailGraphClient({ tunnelId }: TunnelDetailGraphClientPro
     }
   }
 
-  const rendered = useMemo(() => {
-    if (!showRawTagNodes) {
-      return data;
-    }
-
-    const existing = new Set(data.nodes.map((node) => node.id));
-    const tagNodes: TunnelGraphRenderNode[] = [];
-    const tagLinks: TunnelGraphEdgeLink[] = [];
-
-    for (const node of data.nodes) {
-      const tags = Array.isArray(node.tags) ? node.tags : [];
-      for (const tag of tags) {
-        const clean = tag.trim();
-        if (!clean) continue;
-        const tagId = `raw-tag:${clean.toLowerCase()}`;
-        if (!existing.has(tagId)) {
-          existing.add(tagId);
-          tagNodes.push({
-            id: tagId,
-            label: clean,
-            snippet: "",
-            sourceType: "tag",
-            tags: [],
-            kind: "tag",
-          });
-        }
-
-        tagLinks.push({
-          id: `${node.id}-${tagId}`,
-          source: node.id,
-          target: tagId,
-          rationale: "Raw tag membership",
-          weight: 0,
-          bridgeScore: 0,
-        });
-      }
-    }
-
-    return {
-      nodes: [...data.nodes, ...tagNodes],
-      links: [...data.links, ...tagLinks],
-    };
-  }, [data, showRawTagNodes]);
-
   if (loading) {
     return <div className="text-sm text-copy-muted">Loading semantic tunnel graph...</div>;
   }
@@ -215,16 +170,6 @@ export function TunnelDetailGraphClient({ tunnelId }: TunnelDetailGraphClientPro
         </div>
       ) : null}
 
-      <label className="inline-flex items-center gap-2 text-xs text-copy-muted">
-        <input
-          type="checkbox"
-          checked={showRawTagNodes}
-          onChange={(e) => setShowRawTagNodes(e.target.checked)}
-          className="h-4 w-4 rounded border border-outline"
-        />
-        Show raw tag nodes
-      </label>
-
       <div className="flex flex-wrap items-center gap-3">
         <label className="inline-flex items-center gap-2 text-xs text-copy-muted">
           <input
@@ -246,8 +191,8 @@ export function TunnelDetailGraphClient({ tunnelId }: TunnelDetailGraphClientPro
       </div>
 
       <TunnelGraph
-        nodes={rendered.nodes}
-        links={rendered.links}
+        nodes={data.nodes}
+        links={data.links}
         onEdgeSelect={setSelectedEdge}
         onEdgeHover={setHoveredEdge}
       />
